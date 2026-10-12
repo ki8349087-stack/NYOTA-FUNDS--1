@@ -1,4 +1,4 @@
-const express = require("express");
+vconst express = require("express");
 const cors = require("cors");
 const path = require("path");
 
@@ -100,6 +100,12 @@ console.log("Paylor callback:", req.body);
 res.sendStatus(200);
 });
 
-app.listen(PORT, () => {
-console.log(Server running on port ${PORT});
-});
+
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+module.exports = app;
+
