@@ -1,4 +1,3 @@
-
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
@@ -59,7 +58,7 @@ app.post("/stk-push", async (req, res) => {
       });
     }
 
-    // Environment variables
+    // Environment variables configured in Render
     const apiKey = process.env.PAYLOR_API_KEY;
     const channelId = process.env.PAYLOR_CHANNEL_ID;
     const callbackUrl = process.env.CALLBACK_URL;
@@ -210,28 +209,24 @@ app.post("/payment-status", async (req, res) => {
   }
 });
 
-// NEW: Callback browser test
+// Callback URL browser test
 app.get("/callback", (req, res) => {
   res.status(200).send(
     "NYOTA Funds callback endpoint is online."
   );
 });
 
-
-// NEW: Allow the callback URL to open in a browser
-app.get("/callback", (req, res) => {
-  res.status(200).send(
-    "NYOTA Funds callback endpoint is online."
-  );
-});
-
-// Keep this route for Paylor's POST requests
+// Paylor payment callback
 app.post("/callback", (req, res) => {
   try {
     console.log("Paylor callback received.");
 
-    // Payment verification must be implemented
-    // before treating a payment as successful.
+    // IMPORTANT:
+    // Implement Paylor's documented callback authentication
+    // and payment verification before trusting callback data.
+    // Do not mark a payment as successful based only on
+    // receiving a callback.
+
     res.sendStatus(200);
   } catch (error) {
     console.error("Callback handler error:", error.message);
@@ -239,8 +234,7 @@ app.post("/callback", (req, res) => {
   }
 });
 
-
-// Handle unsupported methods on STK Push
+// Handle unsupported methods on the STK Push endpoint
 app.all("/stk-push", (req, res) => {
   res.status(405).json({
     success: false,
