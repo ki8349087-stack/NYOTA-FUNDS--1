@@ -217,22 +217,28 @@ app.get("/callback", (req, res) => {
   );
 });
 
-// Paylor payment callback
+
+// NEW: Allow the callback URL to open in a browser
+app.get("/callback", (req, res) => {
+  res.status(200).send(
+    "NYOTA Funds callback endpoint is online."
+  );
+});
+
+// Keep this route for Paylor's POST requests
 app.post("/callback", (req, res) => {
   try {
     console.log("Paylor callback received.");
 
-    // IMPORTANT:
-    // Verify the callback using Paylor's documented
-    // authentication mechanism before trusting its contents.
-    // Do not mark a payment as successful until verified.
-
+    // Payment verification must be implemented
+    // before treating a payment as successful.
     res.sendStatus(200);
   } catch (error) {
     console.error("Callback handler error:", error.message);
     res.sendStatus(500);
   }
 });
+
 
 // Handle unsupported methods on STK Push
 app.all("/stk-push", (req, res) => {
