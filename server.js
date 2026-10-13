@@ -58,13 +58,19 @@ app.post("/stk-push", async (req, res) => {
       });
     }
 
-    // Validate payment configuration
+    // Read environment variables
     const apiKey = process.env.PAYLOR_API_KEY;
     const channelId = process.env.PAYLOR_CHANNEL_ID;
     const callbackUrl = process.env.CALLBACK_URL;
 
+    // Diagnose missing environment variables without
+    // exposing their actual values in the logs.
     if (!apiKey || !channelId || !callbackUrl) {
-      console.error("Payment configuration is incomplete.");
+      console.error("Missing payment environment variables:", {
+        PAYLOR_API_KEY: Boolean(apiKey),
+        PAYLOR_CHANNEL_ID: Boolean(channelId),
+        CALLBACK_URL: Boolean(callbackUrl)
+      });
 
       return res.status(500).json({
         success: false,
@@ -72,7 +78,7 @@ app.post("/stk-push", async (req, res) => {
       });
     }
 
-    // Submit request to Paylor
+    // Submit STK Push request to Paylor
     const response = await fetch(
       "https://api.paylorke.com/api/v1/merchants/payments/stk-push",
       {
@@ -95,7 +101,6 @@ app.post("/stk-push", async (req, res) => {
     const data = await readResponse(response);
 
     if (!response.ok) {
-      // Keep provider details in server logs for diagnosis.
       console.error("Paylor STK Push failed:", {
         status: response.status,
         message: data.message || data.error || "Provider error"
@@ -150,6 +155,8 @@ app.post("/payment-status", async (req, res) => {
     const apiKey = process.env.PAYLOR_API_KEY;
 
     if (!apiKey) {
+      console.error("PAYLOR_API_KEY is missing.");
+
       return res.status(500).json({
         success: false,
         message: "Payment service is not configured."
@@ -211,11 +218,10 @@ app.post("/callback", (req, res) => {
   try {
     console.log("Paylor callback received.");
 
-    // IMPORTANT:
-    // Verify the callback signature using Paylor's documented
-    // authentication mechanism before trusting payment results.
-    // Update your database only after verifying the callback
-    // or independently confirming the transaction with Paylor.
+    // Verify the callback using Paylor's documented
+    // authentication mechanism before trusting its contents.
+    // Do not mark a payment as complete based only on
+    // an unverified callback.
 
     res.sendStatus(200);
   } catch (error) {
@@ -224,8 +230,8 @@ app.post("/callback", (req, res) => {
   }
 });
 
-// Unknown API routes
-app.use("/stk-push", (req, res) => {
+// Handle unsupported methods on the STK Push endpoint
+app.all("/stk-push", (req, res) => {
   res.status(405).json({
     success: false,
     message: "Method not allowed."
@@ -235,7 +241,9 @@ app.use("/stk-push", (req, res) => {
 // Start server
 if (require.main === module) {
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Respiratory server listening on port ${PORT}`);
+    console.log(
+      `Respiratory server listening on port ${PORT}`
+    );
   });
 }
 
