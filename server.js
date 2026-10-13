@@ -1,3 +1,4 @@
+
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
@@ -19,7 +20,7 @@ app.get("/", (req, res) => {
 app.get("/health", (req, res) => {
   res.status(200).json({
     success: true,
-    message: "Respiratory server is running"
+    message: "NYOTA Funds server is running"
   });
 });
 
@@ -58,13 +59,11 @@ app.post("/stk-push", async (req, res) => {
       });
     }
 
-    // Read environment variables
+    // Environment variables
     const apiKey = process.env.PAYLOR_API_KEY;
     const channelId = process.env.PAYLOR_CHANNEL_ID;
     const callbackUrl = process.env.CALLBACK_URL;
 
-    // Diagnose missing environment variables without
-    // exposing their actual values in the logs.
     if (!apiKey || !channelId || !callbackUrl) {
       console.error("Missing payment environment variables:", {
         PAYLOR_API_KEY: Boolean(apiKey),
@@ -125,7 +124,6 @@ app.post("/stk-push", async (req, res) => {
       transactionId: data.transactionId || null,
       data
     });
-
   } catch (error) {
     console.error("STK Push server error:", error.message);
 
@@ -202,7 +200,6 @@ app.post("/payment-status", async (req, res) => {
         reference: data.reference ?? data.data?.reference ?? null
       }
     });
-
   } catch (error) {
     console.error("Payment status error:", error.message);
 
@@ -213,15 +210,22 @@ app.post("/payment-status", async (req, res) => {
   }
 });
 
-// Paylor callback
+// NEW: Callback browser test
+app.get("/callback", (req, res) => {
+  res.status(200).send(
+    "NYOTA Funds callback endpoint is online."
+  );
+});
+
+// Paylor payment callback
 app.post("/callback", (req, res) => {
   try {
     console.log("Paylor callback received.");
 
+    // IMPORTANT:
     // Verify the callback using Paylor's documented
     // authentication mechanism before trusting its contents.
-    // Do not mark a payment as complete based only on
-    // an unverified callback.
+    // Do not mark a payment as successful until verified.
 
     res.sendStatus(200);
   } catch (error) {
@@ -230,7 +234,7 @@ app.post("/callback", (req, res) => {
   }
 });
 
-// Handle unsupported methods on the STK Push endpoint
+// Handle unsupported methods on STK Push
 app.all("/stk-push", (req, res) => {
   res.status(405).json({
     success: false,
@@ -242,7 +246,7 @@ app.all("/stk-push", (req, res) => {
 if (require.main === module) {
   app.listen(PORT, "0.0.0.0", () => {
     console.log(
-      `Respiratory server listening on port ${PORT}`
+      `NYOTA Funds server listening on port ${PORT}`
     );
   });
 }
