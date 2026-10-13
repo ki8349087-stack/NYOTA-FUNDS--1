@@ -429,16 +429,29 @@ return phone;
 async function readJson(res){
   const txt = await res.text();
 
-  if (!txt) return {};
-
+  let data = {};
   try {
-    return JSON.parse(txt);
+    data = txt ? JSON.parse(txt) : {};
   } catch {
+    if (!res.ok) {
+      throw new Error(
+        `Request failed with HTTP ${res.status}. Check the backend endpoint or payment provider.`
+      );
+    }
     throw new Error(
-      `Server returned an invalid response (HTTP ${res.status}).`
+      `The server returned invalid JSON (HTTP ${res.status}).`
     );
   }
+
+  if (!res.ok) {
+    throw new Error(
+      data.message || data.error || `Request failed with HTTP ${res.status}.`
+    );
+  }
+
+  return data;
 }
+  
   
 
 async function payNow(){
