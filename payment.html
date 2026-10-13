@@ -425,10 +425,21 @@ if(phone.startsWith("07")||phone.startsWith("01")) phone="254"+phone.slice(1);
 return phone;
 }
 
+
 async function readJson(res){
-const txt=await res.text();
-return txt?JSON.parse(txt):{};
+  const txt = await res.text();
+
+  if (!txt) return {};
+
+  try {
+    return JSON.parse(txt);
+  } catch {
+    throw new Error(
+      `Server returned an invalid response (HTTP ${res.status}).`
+    );
+  }
 }
+  
 
 async function payNow(){
 const phone=normalizePhone(phoneEl.value.trim());
