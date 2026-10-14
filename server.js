@@ -63,7 +63,7 @@ app.post("/stk-push", async (req, res) => {
     const channelId = process.env.PAYLOR_CHANNEL_ID;
     const callbackUrl = process.env.CALLBACK_URL;
 
-    if (!apiKey || !callbackUrl) {
+    if (!apiKey || !channelId || !callbackUrl) {
       console.error("Missing payment environment variables:", {
         PAYLOR_API_KEY: Boolean(apiKey),
         PAYLOR_CHANNEL_ID: Boolean(channelId),
@@ -89,6 +89,7 @@ app.post("/stk-push", async (req, res) => {
   phone,
   amount: Number(amount),
   reference: "NYOTA-" + Date.now(),
+  channelId,
   description: "NYOTA Funds Payment",
   callbackUrl
 })
