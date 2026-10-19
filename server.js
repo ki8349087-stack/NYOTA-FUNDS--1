@@ -15,6 +15,25 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
+// Commitment page
+app.get("/commitment.html", (req, res) => {
+  res.sendFile(
+    path.join(__dirname, "commitment.html"),
+    (err) => {
+      if (err && !res.headersSent) {
+        console.error(
+          "Could not find commitment.html:",
+          err.message
+        );
+
+        res.status(404).send(
+          "commitment.html was not found on the server."
+        );
+      }
+    }
+  );
+});
+
 // Health check
 app.get("/health", (req, res) => {
   res.status(200).json({
@@ -86,13 +105,13 @@ app.post("/stk-push", async (req, res) => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-  phone,
-  amount: Number(amount),
-  reference: "NYOTA-" + Date.now(),
-  channelId,
-  description: "NYOTA Funds Payment",
-  callbackUrl
-})
+          phone,
+          amount: Number(amount),
+          reference: "NYOTA-" + Date.now(),
+          channelId,
+          description: "NYOTA Funds Payment",
+          callbackUrl
+        })
       }
     );
 
@@ -221,10 +240,9 @@ app.post("/callback", (req, res) => {
   try {
     console.log("Paylor callback received.");
 
-    // IMPORTANT:
     // Implement Paylor's documented callback authentication
     // and payment verification before trusting callback data.
-    // Do not mark a payment as successful based only on
+    // Do not mark a payment successful based only on
     // receiving a callback.
 
     res.sendStatus(200);
@@ -252,3 +270,4 @@ if (require.main === module) {
 }
 
 module.exports = app;
+
